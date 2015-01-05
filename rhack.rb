@@ -1,24 +1,4 @@
-require 'curses'
-include Curses
-
-def render_array window, a, offset
-  window.setpos offset, offset
-  a.each { |row|
-    row.each { |col| window.addch col }
-    window.setpos window.cury + 1, offset
-  }
-end
-
-init_screen
-
-x = 3
-y = 2
-# box
-offset = 1
-w = Window.new y+2, x+2, 0, 0
-w.box(?|, ?-)
-# map = [[?1, ?2, ?p, ?4], [?4, ?5, ?6, ?7], [?4, ?5, ?6, ?7], [?4, ?5, ?6, ?7]]
-w.keypad true
+# Map and view - the environment
 
 class View
   def initialize x_size, y_size, x_offset, y_offset
@@ -67,11 +47,14 @@ class Map
   end
 end
 
+# Entities - objects in the game
+
 class Entity
   attr_reader :x_pos, :y_pos, :display_char, :precedence
 
-  def initialize x_pos, y_pos
+  def initialize x_pos, y_pos, win_width, win_height
     @x_pos, @y_pos = x_pos, y_pos
+    @win_width, @win_height = win_width, win_height
     @precedence = 0
     @display_char = '.'
   end
@@ -83,14 +66,15 @@ class Moveable < Entity
   end
 
   def move x_off, y_off
-    move_to(@x_pos + x_off, @y_pos + y_off)
+    new_x = (@x_pos + x_off) % @win_width
+    new_y = (@y_pos + y_off) % @win_height
+    move_to(new_x, new_y)
   end
 end
 
 class Player < Moveable
-  def initialize x_pos, y_pos
+  def initialize x_pos, y_pos, win_width, win_height
     super
-
     @precedence = 5
     @display_char = '@'
   end
@@ -102,16 +86,43 @@ end
 class Wall < Entity
 end
 
-map = Map.new 6, 6
-player = Player.new 1, 1
+# Curses stuff
+
+require 'curses'
+include Curses
+
+def render_array window, a, offset
+  window.setpos offset, offset
+  a.each { |row|
+    row.each { |col| window.addch col }
+    window.setpos window.cury + 1, offset
+  }
+end
+
+# Make an empty window
+
+win_width = 20
+win_height = 10
+offset = 1 # width of the border
+
+init_screen # initializes a screen the size of the terminal
+w = Window.new win_height + 2*offset, win_width + 2*offset, 0, 0
+w.box(?|, ?-)
+w.keypad true
+
+# Make a map, view and player for this session
+
+map = Map.new win_width, win_height
+player = Player.new 1, 1, win_width, win_height
 map.add_entity player
 
-v = View.new x, y, 0, 0
+v = View.new win_width, win_height, 0, 0
 a = v.get_area map
 
 render_array w, a, offset
-# Array.new 5 { Array.new 3 }
 noecho
+
+# Main loop
 
 loop do
   char = w.getch
