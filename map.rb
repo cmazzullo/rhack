@@ -15,9 +15,15 @@ module Rhack
       @entities.remove(entity)
     end
 
+    def get_entities x, y
+      @entities.select { |entity|
+        entity.y_pos == y && entity.x_pos == x
+      }
+    end
+
     def flatten
       map_ary = Array.new(@y_size) { Array.new(@x_size) { @blank_char } }
-      @entities.sort{|a, b| a.precedence <=> b.precedence }.each{|entity|
+      @entities.sort{|a, b| a <=> b }.each{|entity|
         map_ary[entity.y_pos][entity.x_pos] = entity.display_char
       }
       map_ary

@@ -15,6 +15,12 @@ ui = CursesUI.new win_width, win_height, border_size
 
 # Make a map, view and player for this session
 map = Map.new win_width, win_height
+MoveArbiter.instance.set_map map
+
+# delete this
+wall1 = Wall.new 3, 3, win_width, win_height
+map.add_entity wall1
+
 player = Player.new 1, 1, win_width, win_height
 map.add_entity player
 
