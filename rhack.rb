@@ -3,12 +3,11 @@ require_relative 'key_constants'
 require_relative 'map'
 require_relative 'view'
 require_relative 'curses_ui'
-
 include Rhack
 
 win_width = 20
 win_height = 10
-border_size = 1 # width of the border
+border_size = 1
 
 ui = CursesUI.new win_width, win_height, border_size
 
