@@ -17,13 +17,10 @@ player = Player.new 1, 1, win_width, win_height
 map.add_entity player
 
 v = View.new win_width, win_height, 0, 0
-a = v.get_area map
 
-ui.render_array a
-
-# Main loop
-
-loop do
+loop do # Main loop
+  a = v.get_area map
+  ui.render_array a
   char = ui.get_user_input
 
   case char
@@ -41,8 +38,6 @@ loop do
     next
   end
 
-  a = v.get_area map
-  ui.render_array a
 end
 
 ui.cleanup
